@@ -1,0 +1,186 @@
+
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Termux Academy</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#0b1120;color:#e5e7eb;font-family:Tahoma,Arial}
+header{padding:25px;background:#111c30;border-bottom:1px solid #26354d}
+header h1{color:#38bdf8;margin:0 0 10px}
+header p{color:#aab8cc;font-size:14px}
+nav{display:flex;gap:10px;padding:12px;background:#0b1120;position:sticky;top:0}
+button{background:#1e293b;color:white;border:1px solid #334155;border-radius:9px;padding:11px 16px;cursor:pointer}
+button.active{background:#0369a1;border-color:#38bdf8}
+main{padding:16px;max-width:800px;margin:auto}
+.panel{background:#111c30;border:1px solid #26354d;border-radius:13px;padding:17px;margin-bottom:15px}
+h2{color:#7dd3fc}
+p{line-height:1.9}
+code{color:#86efac;background:#07101d;padding:4px 7px;border-radius:5px;direction:ltr;display:inline-block}
+#terminal{background:#050a10;border-radius:12px;padding:14px;font-family:monospace;direction:ltr;text-align:left}
+#output{white-space:pre-wrap;overflow-wrap:anywhere;min-height:150px;color:#d1fae5;line-height:1.7}
+#command{width:100%;padding:13px;background:#111827;color:white;border:1px solid #475569;border-radius:8px;font-size:16px;margin-top:10px}
+.small{font-size:12px;color:#94a3b8}
+.hidden{display:none}
+footer{text-align:center;color:#64748b;padding:25px}
+</style>
+</head>
+<body>
+<header>
+<h1>Termux Academy</h1>
+<p>ترموکس رو از صفر یاد بگیر؛ تمرین کن و پیشرفت کن.</p>
+</header>
+
+<nav>
+<button id="lessonBtn" class="active" onclick="showTab('lessons')">آموزش‌ها</button>
+<button id="terminalBtn" onclick="showTab('terminalPage')">ترمینال تمرینی</button>
+</nav>
+
+<main>
+<section id="lessons">
+<div class="panel">
+<h2>به آکادمی ترموکس خوش آمدی!</h2>
+<p>اینجا می‌تونی دستورات پایه لینوکس و ترموکس رو قدم‌به‌قدم یاد بگیری.</p>
+<p class="small">مسیر یادگیری: مبتدی ← دستورات پایه ← پایتون ← مبانی وب</p>
+</div>
+
+<div class="panel">
+<h2>درس اول: ترمینال چیست؟</h2>
+<p>ترمینال محیطی متنی است که با نوشتن دستور با سیستم کار می‌کنیم.</p>
+<p>دستور <code>pwd</code> مسیر پوشه فعلی را نشان می‌دهد.</p>
+<button onclick="loadExample('pwd')">تمرین دستور</button>
+</div>
+
+<div class="panel">
+<h2>درس دوم: دیدن فایل‌ها</h2>
+<p>دستور <code>ls</code> فایل‌ها و پوشه‌های مسیر فعلی را نشان می‌دهد.</p>
+<button onclick="loadExample('ls')">تمرین دستور</button>
+</div>
+
+<div class="panel">
+<h2>درس سوم: ساخت پوشه</h2>
+<p>دستور <code>mkdir test</code> یک پوشه به نام test می‌سازد.</p>
+<button onclick="loadExample('mkdir test')">تمرین دستور</button>
+</div>
+
+<div class="panel">
+<h2>درس چهارم: ساخت فایل</h2>
+<p>دستور <code>touch note.txt</code> یک فایل خالی می‌سازد.</p>
+<button onclick="loadExample('touch note.txt')">تمرین دستور</button>
+</div>
+
+<div class="panel">
+<h2>درس پنجم: خواندن فایل</h2>
+<p>دستور <code>cat note.txt</code> محتوای فایل را نمایش می‌دهد.</p>
+<button onclick="loadExample('cat note.txt')">تمرین دستور</button>
+</div>
+</section>
+
+<section id="terminalPage" class="hidden">
+<div class="panel">
+<h2>ترمینال تمرینی</h2>
+<p>دستورها رو وارد کن و نتیجه رو ببین.</p>
+<p class="small">این یک شبیه‌ساز آموزشی است؛ هیچ دستوری روی گوشی یا سرور واقعی اجرا نمی‌شود.</p>
+<div id="terminal">
+<div id="output">Termux Academy Simulator
+برای دیدن دستورهای قابل استفاده بنویس: help
+
+student@academy:~$</div>
+<input id="command" placeholder="دستور را بنویس..." autocomplete="off">
+<button onclick="runCommand()" style="margin-top:10px">اجرا</button>
+</div>
+</div>
+</section>
+</main>
+
+<footer>Termux Academy | ساخته شده توسط Alisan</footer>
+
+<script>
+let current="/home/student";
+let files={
+"/home/student":{
+"Documents":"dir",
+"Downloads":"dir"
+}
+};
+let contents={};
+
+function showTab(tab){
+document.getElementById("lessons").classList.toggle("hidden",tab!=="lessons");
+document.getElementById("terminalPage").classList.toggle("hidden",tab!=="terminalPage");
+document.getElementById("lessonBtn").classList.toggle("active",tab==="lessons");
+document.getElementById("terminalBtn").classList.toggle("active",tab==="terminalPage");
+}
+
+function loadExample(command){
+showTab("terminalPage");
+document.getElementById("command").value=command;
+document.getElementById("command").focus();
+}
+
+function runCommand(){
+let input=document.getElementById("command");
+let cmd=input.value.trim();
+if(!cmd)return;
+let out=document.getElementById("output");
+let result=execute(cmd);
+out.textContent+="\nstudent@academy:"+current+"$ "+cmd+"\n"+result+"\nstudent@academy:"+current+"$";
+input.value="";
+out.scrollTop=out.scrollHeight;
+}
+
+function execute(line){
+let parts=line.match(/"[^"]*"|'[^']*'|\S+/g)||[];
+let cmd=parts[0];
+let arg=parts[1]?.replace(/^["']|["']$/g,"");
+let folder=files[current]||{};
+
+if(cmd==="help")return "دستورهای قابل استفاده:\npwd, ls, cd, mkdir, touch, echo, cat, clear, help";
+if(cmd==="pwd")return current;
+if(cmd==="ls")return Object.keys(folder).join("  ")||"(پوشه خالی است)";
+if(cmd==="clear"){document.getElementById("output").textContent="ترمینال پاک شد.";return "";}
+if(cmd==="cd"){
+if(!arg||arg==="~"){current="/home/student";return "";}
+if(arg===".."){current=current.substring(0,current.lastIndexOf("/"))||"/";return "";}
+let next=current+"/"+arg;
+if(files[next]){current=next;return "";}
+return "پوشه پیدا نشد.";
+}
+if(cmd==="mkdir"){
+if(!arg)return "نام پوشه را وارد کن.";
+let path=current+"/"+arg;
+if(folder[arg])return "این نام از قبل وجود دارد.";
+folder[arg]="dir";files[path]={};return "پوشه ساخته شد.";
+}
+if(cmd==="touch"){
+if(!arg)return "نام فایل را وارد کن.";
+if(folder[arg])return "این نام از قبل وجود دارد.";
+folder[arg]="file";contents[current+"/"+arg]="";return "فایل ساخته شد.";
+}
+if(cmd==="echo"){
+let text=line.slice(5);
+let match=text.match(/^(.*?)\s*>\s*(.+)$/);
+if(match){
+let name=match[2].trim().replace(/^["']|["']$/g,"");
+folder[name]="file";
+contents[current+"/"+name]=match[1].trim().replace(/^["']|["']$/g,"");
+return "متن داخل فایل ذخیره شد.";
+}
+return text;
+}
+if(cmd==="cat"){
+if(!arg)return "نام فایل را وارد کن.";
+if(folder[arg]!=="file")return "فایل پیدا نشد.";
+return contents[current+"/"+arg]||"(فایل خالی است)";
+}
+return "این دستور پشتیبانی نمی‌شود. برای دیدن دستورها help را بنویس.";
+}
+
+document.getElementById("command").addEventListener("keydown",e=>{
+if(e.key==="Enter")runCommand();
+});
+</script>
+</body>
+</html>
