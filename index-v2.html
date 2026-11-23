@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="google-site-verification" content="KT_lGuxm5lvPECfHpKYFYTPQ_r46mqahgswrINiGOlA">
+<title>Termux Academy 2.0</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#0b1120;color:#e5e7eb;font-family:Tahoma,Arial}
+header{padding:25px;background:#111c30;border-bottom:1px solid #26354d}
+header h1{color:#38bdf8;margin:0 0 10px}
+header p{color:#aab8cc;font-size:14px}
+nav{display:flex;gap:8px;padding:12px;background:#0b1120;position:sticky;top:0;z-index:5;overflow-x:auto}
+button{background:#1e293b;color:white;border:1px solid #334155;border-radius:9px;padding:11px 14px;cursor:pointer;font-family:inherit}
+button.active{background:#0369a1;border-color:#38bdf8}
+main{padding:16px;max-width:800px;margin:auto}
+.panel{background:#111c30;border:1px solid #26354d;border-radius:13px;padding:17px;margin-bottom:15px}
+h2{color:#7dd3fc}
+p{line-height:1.9}
+code{color:#86efac;background:#07101d;padding:4px 7px;border-radius:5px;direction:ltr;display:inline-block}
+.small{font-size:12px;color:#94a3b8}
+.hidden{display:none!important}
+#terminal{background:#050a10;border-radius:12px;padding:14px;font-family:monospace;direction:ltr;text-align:left}
+#output{white-space:pre-wrap;overflow-wrap:anywhere;min-height:150px;color:#d1fae5;line-height:1.7}
+#command{width:100%;padding:13px;background:#111827;color:white;border:1px solid #475569;border-radius:8px;font-size:16px;margin-top:10px}
+.lesson-number{color:#38bdf8;font-size:12px}
+#quizResult{font-weight:bold;color:#7dd3fc;line-height:2}
+.quiz-question{border-bottom:1px solid #334155;padding:12px 0}
+.quiz-question label{display:block;padding:8px;cursor:pointer}
+footer{text-align:center;color:#64748b;padding:25px}
+</style>
+</head>
+<body>
+
+<header>
+<h1>Termux Academy</h1>
+<p>نسخه 2.0 | ترموکس رو از صفر یاد بگیر!</p>
+</header>
+
+<nav>
+<button class="active" id="lessonBtn" onclick="showTab('lessons')">آموزش‌ها</button>
+<button id="terminalBtn" onclick="showTab('terminalPage')">ترمینال</button>
+<button id="quizBtn" onclick="showTab('quizPage')">آزمون</button>
+</nav>
+
+<main>
+<section id="lessons">
+<div class="panel">
+<h2>به آکادمی ترموکس خوش آمدی!</h2>
+<p>اینجا دستورات لینوکس و ترموکس رو از مبتدی تا پیشرفته یاد می‌گیری.</p>
+<p class="small">۱۵ درس آموزشی | آزمون ۵ سؤالی</p>
+</div>
+
+<div id="lessonList"></div>
+</section>
+
+<section id="terminalPage" class="hidden">
+<div class="panel">
+<h2>ترمینال تمرینی</h2>
+<p>دستورها رو وارد کن و نتیجه رو ببین.</p>
+<p class="small">این شبیه‌ساز است و هیچ دستوری روی گوشی واقعی اجرا نمی‌شود.</p>
+<div id="terminal">
+<div id="output">Termux Academy Simulator
+برای دیدن دستورها بنویس: help
+
+student@academy:~$</div>
+<input id="command" placeholder="دستور را بنویس..." autocomplete="off">
+<button onclick="runCommand()" style="margin-top:10px">اجرا</button>
+</div>
+</div>
+</section>
+
+<section id="quizPage" class="hidden">
+<div class="panel">
+<h2>آزمون ترموکس</h2>
+<p>۵ سؤال از درس‌های آکادمی. هر سؤال ۲۰ امتیاز دارد.</p>
+<div id="quizQuestions"></div>
+<button onclick="submitQuiz()">ثبت پاسخ‌ها و مشاهده نمره</button>
+<p id="quizResult"></p>
+</div>
+</section>
+</main>
+
+<footer>Termux Academy | ساخته شده توسط Alisan</footer>
+<script>
+const lessons=[
+["ترمینال چیست؟","ترمینال محیطی متنی برای واردکردن دستورهاست.","pwd"],
+["دیدن فایل‌ها","دستور ls فایل‌ها و پوشه‌های مسیر فعلی را نشان می‌دهد.","ls"],
+["ساخت پوشه","با mkdir می‌توان پوشه جدید ساخت.","mkdir test"],
+["ساخت فایل","دستور touch یک فایل خالی می‌سازد.","touch note.txt"],
+["خواندن فایل","دستور cat محتوای فایل را نمایش می‌دهد.","cat note.txt"],
+["جابه‌جایی بین پوشه‌ها","دستور cd برای تغییر مسیر استفاده می‌شود.","cd Documents"],
+["پاک‌کردن ترمینال","دستور clear خروجی ترمینال را پاک می‌کند.","clear"],
+["شناخت کاربر","دستور whoami نام کاربر فعلی را نشان می‌دهد.","whoami"],
+["بازگشت به پوشه خانه","دستور cd ~ به پوشه خانه برمی‌گردد.","cd ~"],
+["نوشتن داخل فایل","با echo می‌توان متن نمایش داد یا در فایل نوشت.","echo Hello"],
+["نمایش مسیر کامل","pwd مسیر کامل پوشه فعلی را نمایش می‌دهد.","pwd"],
+["کپی فایل","دستور cp برای کپی‌کردن فایل استفاده می‌شود.","cp note.txt copy.txt"],
+["تغییر نام فایل","دستور mv می‌تواند نام فایل را تغییر دهد.","mv note.txt new.txt"],
+["حذف فایل","دستور rm فایل را حذف می‌کند؛ قبل از اجرا مسیر را بررسی کن.","rm old.txt"],
+["تاریخ و ساعت","دستور date تاریخ و ساعت سیستم را نمایش می‌دهد.","date"]
+];
+
+const list=document.getElementById("lessonList");
+
+lessons.forEach((lesson,i)=>{
+let panel=document.createElement("div");
+panel.className="panel";
+panel.innerHTML=
+'<span class="lesson-number">درس '+(i+1)+'</span>'+
+'<h2>'+lesson[0]+'</h2>'+
+'<p>'+lesson[1]+'</p>'+
+'<button>تمرین دستور</button>';
+panel.querySelector("button").onclick=()=>loadExample(lesson[2]);
+list.appendChild(panel);
+});
+
+function showTab(tab){
+["lessons","terminalPage","quizPage"].forEach(id=>{
+document.getElementById(id).classList.toggle("hidden",id!==tab);
+});
+["lessonBtn","terminalBtn","quizBtn"].forEach((id,i)=>{
+document.getElementById(id).classList.toggle("active",
+["lessons","terminalPage","quizPage"][i]===tab);
+});
+}
+</script>
+<script>
+let current="/home/student";
+let files={
+"/home/student":{
+"Documents":"dir",
+"Downloads":"dir"
+}
+};
+let contents={};
+
+function loadExample(command){
+showTab("terminalPage");
+document.getElementById("command").value=command;
+document.getElementById("command").focus();
+}
+
+function runCommand(){
+let input=document.getElementById("command");
+let cmd=input.value.trim();
+if(!cmd)return;
+
+let out=document.getElementById("output");
+let result=execute(cmd);
+
+out.textContent+="\nstudent@academy:"+current+"$ "+cmd+"\n"+result+"\nstudent@academy:"+current+"$";
+input.value="";
+out.scrollTop=out.scrollHeight;
+}
+
+function execute(line){
+let parts=line.match(/"[^"]*"|'[^']*'|\S+/g)||[];
+let cmd=parts[0];
+let arg=parts[1]?.replace(/^["']|["']$/g,"");
+let folder=files[current]||{};
+
+if(cmd==="help")
+return "دستورها:\npwd, ls, cd, mkdir, touch, echo, cat, clear, whoami, cp, mv, rm, date";
+
+if(cmd==="pwd")return current;
+if(cmd==="whoami")return "student";
+
+if(cmd==="date")return new Date().toLocaleString("fa-IR");
+
+if(cmd==="ls")
+return Object.keys(folder).join("  ")||"(پوشه خالی است)";
+
+if(cmd==="clear"){
+document.getElementById("output").textContent="ترمینال پاک شد.";
+return "";
+}
+
+if(cmd==="cd"){
+if(!arg||arg==="~"){
+current="/home/student";
+return "";
+}
+if(arg===".."){
+current=current.substring(0,current.lastIndexOf("/"))||"/";
+return "";
+}
+let next=current+"/"+arg;
+if(files[next]){
+current=next;
+return "";
+}
+return "پوشه پیدا نشد.";
+}
+
+if(cmd==="mkdir"){
+if(!arg)return "نام پوشه را وارد کن.";
+let path=current+"/"+arg;
+if(folder[arg])return "این نام از قبل وجود دارد.";
+folder[arg]="dir";
+files[path]={};
+return "پوشه ساخته شد.";
+}
+
+if(cmd==="touch"){
+if(!arg)return "نام فایل را وارد کن.";
+if(folder[arg])return "این نام از قبل وجود دارد.";
+folder[arg]="file";
+contents[current+"/"+arg]="";
+return "فایل ساخته شد.";
+}
+
+if(cmd==="echo"){
+let text=line.slice(5);
+let match=text.match(/^(.*?)\s*>\s*(.+)$/);
+
+if(match){
+let name=match[2].trim().replace(/^["']|["']$/g,"");
+folder[name]="file";
+contents[current+"/"+name]=match[1].trim().replace(/^["']|["']$/g,"");
+return "متن داخل فایل ذخیره شد.";
+}
+return text;
+}
+
+if(cmd==="cat"){
+if(!arg)return "نام فایل را وارد کن.";
+if(folder[arg]!=="file")return "فایل پیدا نشد.";
+return contents[current+"/"+arg]||"(فایل خالی است)";
+}
+
+if(cmd==="cp"){
+if(!arg||!parts[2])return "روش استفاده: cp source destination";
+let dest=parts[2].replace(/^["']|["']$/g,"");
+if(folder[arg]!=="file")return "فایل مبدأ پیدا نشد.";
+folder[dest]="file";
+contents[current+"/"+dest]=contents[current+"/"+arg]||"";
+return "فایل کپی شد.";
+}
+
+if(cmd==="mv"){
+if(!arg||!parts[2])return "روش استفاده: mv old new";
+let dest=parts[2].replace(/^["']|["']$/g,"");
+if(folder[arg]!=="file")return "فایل پیدا نشد.";
+folder[dest]="file";
+contents[current+"/"+dest]=contents[current+"/"+arg]||"";
+delete folder[arg];
+delete contents[current+"/"+arg];
+return "نام فایل تغییر کرد.";
+}
+
+if(cmd==="rm"){
+if(!arg)return "نام فایل را وارد کن.";
+if(folder[arg]!=="file")return "فایل پیدا نشد.";
+delete folder[arg];
+delete contents[current+"/"+arg];
+return "فایل آزمایشی حذف شد.";
+}
+
+return "این دستور پشتیبانی نمی‌شود. help را بنویس.";
+}
+
+document.getElementById("command").addEventListener("keydown",e=>{
+if(e.key==="Enter")runCommand();
+});
+
+const questions=[
+{
+q:"کدام دستور مسیر فعلی را نشان می‌دهد؟",
+a:["ls","pwd","cd"],
+correct:1
+},
+{
+q:"برای ساخت پوشه از چه دستوری استفاده می‌کنیم؟",
+a:["mkdir","touch","cat"],
+correct:0
+},
+{
+q:"کدام دستور محتوای فایل را می‌خواند؟",
+a:["mv","pwd","cat"],
+correct:2
+},
+{
+q:"برای کپی فایل چه دستوری داریم؟",
+a:["cp","rm","clear"],
+correct:0
+},
+{
+q:"کدام دستور نام کاربر را نشان می‌دهد؟",
+a:["date","whoami","echo"],
+correct:1
+}
+];
+
+const quizBox=document.getElementById("quizQuestions");
+
+questions.forEach((q,i)=>{
+let div=document.createElement("div");
+div.className="quiz-question";
+
+let html="<p>"+(i+1)+". "+q.q+"</p>";
+
+q.a.forEach((answer,j)=>{
+html+='<label><input type="radio" name="q'+i+'" value="'+j+'"> '+answer+'</label>';
+});
+
+div.innerHTML=html;
+quizBox.appendChild(div);
+});
+
+function submitQuiz(){
+let score=0;
+let answered=0;
+
+questions.forEach((q,i)=>{
+let selected=document.querySelector('input[name="q'+i+'"]:checked');
+if(selected){
+answered++;
+if(Number(selected.value)===q.correct)score+=20;
+}
+});
+
+let result=document.getElementById("quizResult");
+
+if(answered<5){
+result.textContent="هنوز به همه سؤال‌ها پاسخ ندادی! پاسخ داده‌شده: "+answered+" از ۵";
+return;
+}
+
+result.textContent="نمره تو: "+score+" از ۱۰۰ 🎉";
+}
+</script>
+
+</body>
+</html>
